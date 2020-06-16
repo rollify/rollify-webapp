@@ -7,7 +7,9 @@ const routes = [
   {
     path: "/room",
     component: () => import("layouts/Room.vue"),
-    children: [{ path: ":id", component: () => import("pages/RoomIndex.vue") }]
+    children: [
+      { path: ":roomId", component: () => import("pages/RoomIndex.vue") }
+    ]
   }
 ];
 
