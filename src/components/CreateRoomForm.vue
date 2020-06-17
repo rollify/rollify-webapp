@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import { store } from "../store/store.js";
+
 export default {
   name: "CreateRoomForm",
   data() {
@@ -53,8 +55,16 @@ export default {
       this.$axios
         .post("api/v1/rooms", data)
         .then(response => {
-          const id = response.data.id;
-          this.$router.push(`/room/${id}`);
+          console.log(response);
+          // Save our room data.
+          store.room.id = response.data.id;
+          store.room.name = response.data.name;
+
+          // Go to our room.
+          this.$router.push({
+            name: "room",
+            params: { roomId: store.room.id }
+          });
         })
         .catch(error => {
           console.error(`Error creating room: ${error}`);

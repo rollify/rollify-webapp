@@ -3,12 +3,12 @@
     <div class="fixed-center text-center">
       <div class="row">
         <div class="col-12">
-          <h1>Rollify</h1>
+          <h2>Log in as user</h2>
         </div>
       </div>
       <div class="row">
         <div class="col-12">
-          <CreateRoomForm />
+          <SelectUserInRoomForm />
         </div>
       </div>
     </div>
@@ -16,12 +16,12 @@
 </template>
 
 <script>
-import CreateRoomForm from "components/CreateRoomForm";
+import SelectUserInRoomForm from "components/SelectUserInRoomForm";
 
 export default {
-  name: "PageIndex",
+  name: "RoomSelectUser",
   components: {
-    CreateRoomForm
+    SelectUserInRoomForm
   }
 };
 </script>

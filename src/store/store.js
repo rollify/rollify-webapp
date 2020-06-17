@@ -53,6 +53,10 @@ export const store = Vue.observable({
     diceRolls: []
   },
 
+  user: {
+    id: "",
+    name: ""
+  },
   // users stores the information of the connected users in the room.
   users: {},
 

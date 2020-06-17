@@ -2,13 +2,34 @@ const routes = [
   {
     path: "/",
     component: () => import("layouts/Main.vue"),
-    children: [{ path: "", component: () => import("pages/Index.vue") }]
+    children: [
+      {
+        name: "index",
+        path: "",
+        component: () => import("pages/Index.vue")
+      }
+    ]
   },
   {
     path: "/room",
     component: () => import("layouts/Room.vue"),
     children: [
-      { path: ":roomId", component: () => import("pages/RoomIndex.vue") }
+      {
+        name: "room",
+        path: ":roomId",
+        component: () => import("pages/RoomIndex.vue")
+      }
+    ]
+  },
+  {
+    path: "/login",
+    component: () => import("layouts/Login.vue"),
+    children: [
+      {
+        name: "login",
+        path: "",
+        component: () => import("pages/SelectUser.vue")
+      }
     ]
   }
 ];
