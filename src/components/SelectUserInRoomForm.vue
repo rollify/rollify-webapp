@@ -52,23 +52,21 @@ export default {
         );
       });
     },
-    getRoomUsers() {
-      const users = [
-        { id: "user1", name: "User1" },
-        { id: "user2", name: "User2" },
-        { id: "user3", name: "User3" },
-        { id: "user4", name: "User4" },
-        { id: "test1", name: "test1" },
-        { id: "test2", name: "Test2" },
-        { id: "test3", name: "test3" },
-        { id: "test4", name: "Test4" },
-        { id: "other user1", name: "Other User1" },
-        { id: "other user2", name: "Other User2" },
-        { id: "other user3", name: "Other User3" },
-        { id: "other user4", name: "Other User4" }
-      ];
 
-      return users;
+    // createUser creates an user in the server using the REST API and
+    // returns an user instance with `id` and `name`.
+    async getRoomUsers() {
+      try {
+        const params = { "room-id": store.room.id };
+        const resp = await this.$axios.get("api/v1/users", { params: params });
+        return resp.data.items;
+      } catch (e) {
+        console.log(`error getting users: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "Error getting users"
+        });
+      }
     },
 
     // onInputValue will set on every text input change the value
@@ -77,13 +75,31 @@ export default {
     onInputValue(val) {
       this.selectedUser = val;
     },
-    onSubmit() {
+
+    // createUser creates an user in the server using the REST API and
+    // returns an user instance with `id` and `name`.
+    async createUser() {
+      try {
+        const data = { room_id: store.room.id, name: this.selectedUser };
+        const resp = await this.$axios.post("api/v1/users", data);
+        return {
+          id: resp.data.id,
+          name: resp.data.name
+        };
+      } catch (e) {
+        console.log(`error creating user: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "Error creating user"
+        });
+      }
+    },
+
+    async onSubmit() {
       // If we are on the list create the user.
       let user = this.connectedUsersByName[this.selectedUser.toLowerCase()];
       if (!user) {
-        user = { id: this.selectedUser, name: this.selectedUser };
-        // TODO(slok): Create user.
-        console.log(`user created: ${user.id} ${user.name}`);
+        user = await this.createUser();
       }
 
       // Save our user data.
@@ -118,9 +134,9 @@ export default {
       return "Create user";
     }
   },
-  mounted() {
+  async mounted() {
     // Fetch data.
-    const users = this.getRoomUsers();
+    const users = await this.getRoomUsers();
 
     // Prepare data.
     let connectedUsersByName = {};

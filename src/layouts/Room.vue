@@ -5,6 +5,7 @@
         <q-toolbar>
           <q-icon name="fas fa-dungeon" size="md" />
           <q-toolbar-title> {{ room.name }} </q-toolbar-title>
+          {{ user.name }}
           <q-btn flat round dense icon="share" />
         </q-toolbar>
 
@@ -89,6 +90,7 @@ export default {
       store.room.id = this.$route.params.roomId;
       store.room.name = "My awesome room";
     },
+
     getLogs() {
       // Fake receive dice rolls.
       setInterval(() => {
@@ -101,54 +103,49 @@ export default {
         store.logs.notifications++;
       }, 1500);
     },
-    getUsers() {
-      // Use Vue.set because new objects that need to be reative need to be
-      // set like this so Vue can track them.
-      Vue.set(store.users, "1", {
-        id: "1",
-        name: "user1",
-        notifications: 5,
-        diceRolls: [
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[1,1,1,1,1]" },
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[2,2,2,2]" },
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[5,5,5,5,5]" }
-        ]
-      });
 
-      Vue.set(store.users, "2", {
-        id: "2",
-        name: "user2",
-        notifications: 2,
-        diceRolls: [
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[1,1,1,1,1]" },
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[2,2,2,2]" },
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[5,5,5,5,5]" }
-        ]
-      });
+    // getRoomUsers gets room users using the server REST API and
+    // returns a list of user instances with `id` and `name`.
+    async getRoomUsers() {
+      try {
+        const params = { "room-id": store.room.id };
+        const resp = await this.$axios.get("api/v1/users", { params: params });
+        return resp.data.items;
+      } catch (e) {
+        console.log(`error getting users: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "Error getting users"
+        });
+      }
+    },
 
-      Vue.set(store.users, "3", {
-        id: "3",
-        name: "user3",
-        notifications: 0,
-        diceRolls: [
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[1,1,1,1,1]" },
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[2,2,2,2]" },
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[5,5,5,5,5]" }
-        ]
-      });
+    async prepareUsers() {
+      const users = await this.getRoomUsers();
 
-      Vue.set(store.users, "4", {
-        id: "4",
-        name: "user4",
-        notifications: 10,
-        diceRolls: [
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[1,1,1,1,1]" },
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[2,2,2,2]" },
-          { ts: moment("1912-06-23T01:02:03Z"), msg: "[5,5,5,5,5]" }
-        ]
+      // Set user data on the global store.
+      users.forEach(user => {
+        // Don't add us.
+        if (user.id == store.user.id) {
+          return;
+        }
+
+        // Use Vue.set because new objects that need to be reative need to be
+        // set like this so Vue can track them.
+        Vue.set(store.users, user.id, {
+          id: user.id,
+          name: user.name,
+          notifications: 5,
+          diceRolls: [
+            { ts: moment("1912-06-23T01:02:03Z"), msg: "[1,1,1,1,1]" },
+            { ts: moment("1912-06-23T01:02:03Z"), msg: "[2,2,2,2]" },
+            { ts: moment("1912-06-23T01:02:03Z"), msg: "[5,5,5,5,5]" }
+          ]
+        });
       });
     }
   },
+
   beforeRouteEnter(to, from, next) {
     // If we come directly to this url, maybe the room id is not set
     store.room.id = to.params.roomId;
@@ -163,11 +160,12 @@ export default {
 
     next();
   },
-  mounted() {
+
+  async mounted() {
     // Load initial data when mouting the base layout.
-    this.getRoom();
-    this.getLogs();
-    this.getUsers();
+    await this.getRoom();
+    await this.getLogs();
+    await this.prepareUsers();
   }
 };
 </script>
