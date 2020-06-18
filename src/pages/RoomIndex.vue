@@ -79,6 +79,10 @@ export default {
         })
         .catch(error => {
           console.error(`Error creating dice roll: ${error}`);
+          this.$q.notify({
+            type: "negative",
+            message: "Error creating dice roll"
+          });
         });
     },
 

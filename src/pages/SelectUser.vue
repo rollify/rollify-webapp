@@ -19,7 +19,7 @@
 import SelectUserInRoomForm from "components/SelectUserInRoomForm";
 
 export default {
-  name: "RoomSelectUser",
+  name: "SelectUser",
   components: {
     SelectUserInRoomForm
   }
