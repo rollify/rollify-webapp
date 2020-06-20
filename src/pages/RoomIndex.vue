@@ -64,26 +64,22 @@ export default {
 
     // makeCreateDiceRollRequest will craft a new request to create a dice roll
     // using the global store dice bag, and make an HTTP request to the API.
-    makeCreateDiceRollRequest(diceToRoll) {
-      // Craft api request for the roll and make request.
-      let data = {
-        user_id: "test",
-        room_id: store.room.id,
-        dice_type_ids: diceToRoll
-      };
+    async makeCreateDiceRollRequest(diceToRoll) {
+      try {
+        const diceRollResult = await this.$apiDiceRollService.createDiceRoll(
+          store.room.id,
+          store.user.id,
+          diceToRoll
+        );
 
-      return this.$axios
-        .post("api/v1/dice/rolls", data)
-        .then(response => {
-          return response.data;
-        })
-        .catch(error => {
-          console.error(`Error creating dice roll: ${error}`);
-          this.$q.notify({
-            type: "negative",
-            message: "Error creating dice roll"
-          });
+        return diceRollResult;
+      } catch (e) {
+        console.error(`Error creating dice roll: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "Error creating dice roll"
         });
+      }
     },
 
     // rollDiceBag will get all the dice quantity form the dice bag

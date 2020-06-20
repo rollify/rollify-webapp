@@ -85,64 +85,60 @@ export default {
   },
 
   methods: {
-    getRoom() {
+    async getRoom() {
       // We don't want to destroy the shared object.
       store.room.id = this.$route.params.roomId;
-      store.room.name = "My awesome room";
+      store.room.name = this.$route.params.roomId;
     },
 
-    getLogs() {
-      // Fake receive dice rolls.
-      setInterval(() => {
-        store.logs.diceRolls.unshift({
-          id: moment.now(),
-          ts: moment(moment.now()),
-          user: "user 1",
-          msg: "[1,1,1,1,1]"
-        });
-        store.logs.notifications++;
-      }, 1500);
-    },
-
-    // getRoomUsers gets room users using the server REST API and
-    // returns a list of user instances with `id` and `name`.
-    async getRoomUsers() {
+    async getFirstDiceRolls() {
       try {
-        const params = { "room-id": store.room.id };
-        const resp = await this.$axios.get("api/v1/users", { params: params });
-        return resp.data.items;
+        // Get dice rolls.
+        const diceRolls = await this.$apiDiceRollService.listDiceRolls(
+          store.room.id
+        );
+
+        // Set dice rolls.
+        diceRolls.forEach(diceRoll => {
+          store.logs.diceRolls.push(diceRoll);
+          store.logs.notifications++;
+        });
       } catch (e) {
-        console.log(`error getting users: ${e}`);
+        console.log(`error getting first dice rolls: ${e}`);
         this.$q.notify({
           type: "negative",
-          message: "Error getting users"
+          message: "Error getting dice rolls"
         });
       }
     },
 
     async prepareUsers() {
-      const users = await this.getRoomUsers();
+      try {
+        // Get users.
+        const users = await this.$apiUserService.listRoomUsers(store.room.id);
 
-      // Set user data on the global store.
-      users.forEach(user => {
-        // Don't add us.
-        if (user.id == store.user.id) {
-          return;
-        }
-
-        // Use Vue.set because new objects that need to be reative need to be
-        // set like this so Vue can track them.
-        Vue.set(store.users, user.id, {
-          id: user.id,
-          name: user.name,
-          notifications: 5,
-          diceRolls: [
-            { ts: moment("1912-06-23T01:02:03Z"), msg: "[1,1,1,1,1]" },
-            { ts: moment("1912-06-23T01:02:03Z"), msg: "[2,2,2,2]" },
-            { ts: moment("1912-06-23T01:02:03Z"), msg: "[5,5,5,5,5]" }
-          ]
+        // Set user data on the global store.
+        users.forEach(user => {
+          // Use Vue.set because new objects that need to be reative need to be
+          // set like this so Vue can track them.
+          Vue.set(store.users, user.id, {
+            id: user.id,
+            name: user.name,
+            notifications: 5,
+            diceRolls: [
+              { ts: moment("1912-06-23T01:02:03Z"), msg: "[1,1,1,1,1]" },
+              { ts: moment("1912-06-23T01:02:03Z"), msg: "[2,2,2,2]" },
+              { ts: moment("1912-06-23T01:02:03Z"), msg: "[5,5,5,5,5]" }
+            ]
+          });
         });
-      });
+      } catch (e) {
+        console.log(`error getting users: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "Error getting userss"
+        });
+      }
     }
   },
 
@@ -164,8 +160,8 @@ export default {
   async mounted() {
     // Load initial data when mouting the base layout.
     await this.getRoom();
-    await this.getLogs();
     await this.prepareUsers();
+    await this.getFirstDiceRolls();
   }
 };
 </script>

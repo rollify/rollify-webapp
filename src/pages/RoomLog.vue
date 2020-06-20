@@ -13,7 +13,35 @@
           :data="logs.diceRolls"
           :columns="columns"
           row-key="id"
-        />
+        >
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td key="time" :props="props">
+                {{ props.row.ts }}
+              </q-td>
+              <q-td key="user" :props="props">
+                {{ props.row.user }}
+              </q-td>
+              <q-td key="diceRolls" :props="props">
+                <div class="row q-pa-xs q-gutter-xs justify-right">
+                  <div
+                    v-for="die in props.row.dice"
+                    :key="die.id"
+                    class="col-1"
+                  >
+                    <q-avatar
+                      size="md"
+                      :color="die.metadata.color"
+                      text-color="white"
+                    >
+                      {{ die.value }}
+                    </q-avatar>
+                  </div>
+                </div>
+              </q-td>
+            </q-tr>
+          </template>
+        </q-table>
       </div>
     </div>
   </q-page>
@@ -33,24 +61,19 @@ export default {
           required: true,
           label: "Time",
           align: "left",
-          field: row => row.ts,
-          format: val => `${val}`,
           sortable: true
         },
         {
           name: "user",
           required: true,
           label: "User",
-          align: "left",
-          field: row => row.user,
-          format: val => `${val}`
+          align: "left"
         },
         {
-          name: "msg",
+          required: true,
+          name: "diceRolls",
           align: "center",
-          label: "Dice roll",
-          field: row => row.msg,
-          format: val => `${val}`
+          label: "Dice roll"
         }
       ]
     };
