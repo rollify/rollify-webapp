@@ -53,13 +53,12 @@ export default {
       });
     },
 
-    // createUser creates an user in the server using the REST API and
-    // returns an user instance with `id` and `name`.
+    // getRoomUsers gets room users using the server REST API and
+    // returns a list of user instances with `id` and `name`.
     async getRoomUsers() {
       try {
-        const params = { "room-id": store.room.id };
-        const resp = await this.$axios.get("api/v1/users", { params: params });
-        return resp.data.items;
+        const users = await this.$apiUserService.listRoomUsers(store.room.id);
+        return users;
       } catch (e) {
         console.log(`error getting users: ${e}`);
         this.$q.notify({
@@ -80,12 +79,11 @@ export default {
     // returns an user instance with `id` and `name`.
     async createUser() {
       try {
-        const data = { room_id: store.room.id, name: this.selectedUser };
-        const resp = await this.$axios.post("api/v1/users", data);
-        return {
-          id: resp.data.id,
-          name: resp.data.name
-        };
+        const user = await this.$apiUserService.createUser(
+          store.room.id,
+          this.selectedUser
+        );
+        return user;
       } catch (e) {
         console.log(`error creating user: ${e}`);
         this.$q.notify({
