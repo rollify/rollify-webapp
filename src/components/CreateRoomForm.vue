@@ -32,29 +32,27 @@ export default {
     };
   },
   methods: {
-    onSubmit() {
-      const data = { name: this.roomName };
-      this.$axios
-        .post("api/v1/rooms", data)
-        .then(response => {
-          console.log(response);
-          // Save our room data.
-          store.room.id = response.data.id;
-          store.room.name = response.data.name;
+    async onSubmit() {
+      try {
+        // Create room in the API.
+        const room = await this.$apiRoomService.createRoom(this.roomName);
 
-          // Go to our room.
-          this.$router.push({
-            name: "room",
-            params: { roomId: store.room.id }
-          });
-        })
-        .catch(error => {
-          console.error(`Error creating room: ${error}`);
-          this.$q.notify({
-            type: "negative",
-            message: "Error creating room"
-          });
+        // Save our room data on the store.
+        store.room.id = room.id;
+        store.room.name = room.name;
+
+        // Go to our room.
+        this.$router.push({
+          name: "room",
+          params: { roomId: store.room.id }
         });
+      } catch (e) {
+        console.error(`Error creating room: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "Error creating room"
+        });
+      }
     }
   }
 };
