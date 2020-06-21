@@ -7,7 +7,9 @@
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
 
-module.exports = function(/* ctx */) {
+const config = require("./config/index.js");
+
+module.exports = function(/*ctx*/) {
   return {
     // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie
     supportIE: false,
@@ -43,6 +45,12 @@ module.exports = function(/* ctx */) {
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
+      // Add Variables on env vars at build time.
+      env: {
+        ROLLIFY_API_ADDRESS: JSON.stringify(config.ROLLIFY_API_ADDRESS),
+        ROLLIFY_API_TIMEOUT: JSON.stringify(config.ROLLIFY_API_TIMEOUT)
+      },
+
       vueRouterMode: "history", // available values: 'hash', 'history'
 
       // Add dependencies for transpiling with Babel (Array of regexes)
