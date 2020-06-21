@@ -11,17 +11,9 @@
 
         <q-tabs v-model="tab">
           <q-tab name="rollDice" icon="fas fa-dice-d20" label="Roll dice" />
-          <q-tab name="all" icon="fas fa-book" label="All" />
-
-          <q-tab
-            v-for="user in users"
-            :key="user.id"
-            :name="user.name"
-            icon="fas fa-user"
-            :label="user.name"
-          >
-            <q-badge floating color="red" v-if="user.notifications > 0">
-              {{ user.notifications }}
+          <q-tab name="all" icon="fas fa-book" label="All">
+            <q-badge floating color="red" v-if="logs.notifications > 0">
+              {{ logs.notifications }}
             </q-badge>
           </q-tab>
         </q-tabs>
@@ -42,16 +34,6 @@
           <q-tab-panel name="all">
             <RoomLog />
           </q-tab-panel>
-
-          <q-tab-panel
-            v-for="user in users"
-            :key="user.id"
-            :name="user.name"
-            icon="person"
-            :label="user.name"
-          >
-            <RoomUser :user="user" />
-          </q-tab-panel>
         </q-tab-panels>
       </q-page-container>
     </q-layout>
@@ -65,14 +47,12 @@ import Vue from "vue";
 import { store } from "../store/store.js";
 import RoomIndex from "pages/RoomIndex";
 import RoomLog from "pages/RoomLog";
-import RoomUser from "pages/RoomUser";
 
 export default {
   name: "Room",
   components: {
     RoomIndex,
-    RoomLog,
-    RoomUser
+    RoomLog
   },
   data() {
     return {
@@ -91,16 +71,53 @@ export default {
       store.room.name = this.$route.params.roomId;
     },
 
-    async getFirstDiceRolls() {
+    getDiceRollsInterval() {
+      setInterval(
+        async function() {
+          try {
+            // Get dice rolls.
+            const diceRollsList = await this.$apiDiceRollService.listDiceRollsSince(
+              store.room.id,
+              store.logs.cursor
+            );
+
+            // Store next cursor if we have one.
+            if (diceRollsList.cursor) {
+              store.logs.cursor = diceRollsList.cursor;
+            }
+
+            // Set dice rolls.
+            diceRollsList.diceRolls.forEach(diceRoll => {
+              store.logs.diceRolls.unshift(diceRoll);
+              store.logs.notifications++;
+            });
+          } catch (e) {
+            console.log(`error getting first dice rolls: ${e}`);
+            this.$q.notify({
+              type: "negative",
+              message: "Error getting dice rolls"
+            });
+          }
+        }.bind(this),
+        2500
+      );
+    },
+
+    async fillFirstDiceRolls() {
       try {
         // Get dice rolls.
-        const diceRolls = await this.$apiDiceRollService.listDiceRolls(
+        const diceRollsList = await this.$apiDiceRollService.listDiceRolls(
           store.room.id
         );
 
+        // Store next cursor if we have one.
+        if (diceRollsList.cursor) {
+          store.logs.cursor = diceRollsList.cursor;
+        }
+
         // Set dice rolls.
-        diceRolls.forEach(diceRoll => {
-          store.logs.diceRolls.push(diceRoll);
+        diceRollsList.diceRolls.forEach(diceRoll => {
+          store.logs.diceRolls.unshift(diceRoll);
           store.logs.notifications++;
         });
       } catch (e) {
@@ -112,7 +129,7 @@ export default {
       }
     },
 
-    async prepareUsers() {
+    async fillUsers() {
       try {
         // Get users.
         const users = await this.$apiUserService.listRoomUsers(store.room.id);
@@ -123,13 +140,7 @@ export default {
           // set like this so Vue can track them.
           Vue.set(store.users, user.id, {
             id: user.id,
-            name: user.name,
-            notifications: 5,
-            diceRolls: [
-              { ts: moment("1912-06-23T01:02:03Z"), msg: "[1,1,1,1,1]" },
-              { ts: moment("1912-06-23T01:02:03Z"), msg: "[2,2,2,2]" },
-              { ts: moment("1912-06-23T01:02:03Z"), msg: "[5,5,5,5,5]" }
-            ]
+            name: user.name
           });
         });
       } catch (e) {
@@ -139,6 +150,36 @@ export default {
           message: "Error getting userss"
         });
       }
+    },
+
+    async getUsersInterval() {
+      setInterval(
+        async function() {
+          try {
+            // Get users.
+            const users = await this.$apiUserService.listRoomUsers(
+              store.room.id
+            );
+
+            // Set user data on the global store.
+            users.forEach(user => {
+              // Use Vue.set because new objects that need to be reative need to be
+              // set like this so Vue can track them.
+              Vue.set(store.users, user.id, {
+                id: user.id,
+                name: user.name
+              });
+            });
+          } catch (e) {
+            console.log(`error getting users: ${e}`);
+            this.$q.notify({
+              type: "negative",
+              message: "Error getting userss"
+            });
+          }
+        }.bind(this),
+        10000
+      );
     }
   },
 
@@ -160,8 +201,11 @@ export default {
   async mounted() {
     // Load initial data when mouting the base layout.
     await this.getRoom();
-    await this.prepareUsers();
-    await this.getFirstDiceRolls();
+    await this.fillUsers();
+    await this.fillFirstDiceRolls();
+
+    this.getUsersInterval();
+    this.getDiceRollsInterval();
   }
 };
 </script>

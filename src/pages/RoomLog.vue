@@ -12,6 +12,7 @@
           title="all dice rolls"
           :data="logs.diceRolls"
           :columns="columns"
+          :pagination="pagination"
           row-key="id"
         >
           <template v-slot:body="props">
@@ -55,13 +56,16 @@ export default {
   data() {
     return {
       logs: store.logs,
+      pagination: {
+        page: 1,
+        rowsPerPage: 10
+      },
       columns: [
         {
           name: "time",
           required: true,
           label: "Time",
-          align: "left",
-          sortable: true
+          align: "left"
         },
         {
           name: "user",
@@ -77,6 +81,14 @@ export default {
         }
       ]
     };
+  },
+  mounted() {
+    // Notifications have been read read.
+    store.logs.notifications = 0;
+  },
+  updated() {
+    // Notifications have been read read.
+    store.logs.notifications = 0;
   }
 };
 </script>

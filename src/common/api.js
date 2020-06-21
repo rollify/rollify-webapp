@@ -113,6 +113,7 @@ export class DiceRollService {
   }
 
   async listDiceRolls(roomId) {
+    // TODO(slok) get all pages.
     const resp = await this.axiosClient.get("api/v1/dice/rolls", {
       params: {
         "room-id": roomId
@@ -123,9 +124,39 @@ export class DiceRollService {
     const diceRolls = [];
     resp.data.items.forEach(diceRoll => {
       const modelDiceRoll = this.diceRollToModel(diceRoll);
+      // Reverse because we obtained in desc order.
+      diceRolls.unshift(modelDiceRoll);
+    });
+
+    return {
+      diceRolls: diceRolls,
+      cursor: resp.data.metadata.first_cursor
+    };
+  }
+
+  // listDiceRollsSince returns the dice rolls that have been done
+  // since the cursor
+  async listDiceRollsSince(roomId, cursor) {
+    // TODO(slok) get all pages.
+    const resp = await this.axiosClient.get("api/v1/dice/rolls", {
+      params: {
+        "room-id": roomId,
+        cursor: cursor,
+        order: "asc"
+      }
+    });
+
+    // To model.
+    const diceRolls = [];
+    resp.data.items.forEach(diceRoll => {
+      const modelDiceRoll = this.diceRollToModel(diceRoll);
+      // Just push because are in asc order.
       diceRolls.push(modelDiceRoll);
     });
 
-    return diceRolls;
+    return {
+      diceRolls: diceRolls,
+      cursor: resp.data.metadata.last_cursor
+    };
   }
 }

@@ -50,7 +50,8 @@ export const store = Vue.observable({
   // logs stores the global dice roll logs information.
   logs: {
     notifications: 0,
-    diceRolls: []
+    diceRolls: [],
+    cursor: ""
   },
 
   user: {
