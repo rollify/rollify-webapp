@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import Vue from "vue";
 
 import { store } from "../store/store.js";

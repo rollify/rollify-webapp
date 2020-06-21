@@ -18,10 +18,10 @@
           <template v-slot:body="props">
             <q-tr :props="props">
               <q-td key="time" :props="props">
-                {{ props.row.ts }}
+                <HumanDate :date="props.row.ts" />
               </q-td>
               <q-td key="user" :props="props">
-                {{ props.row.user }}
+                <h6>{{ props.row.user }}</h6>
               </q-td>
               <q-td key="diceRolls" :props="props">
                 <div class="row q-pa-xs q-gutter-xs justify-right">
@@ -50,9 +50,13 @@
 
 <script>
 import { store } from "../store/store.js";
+import HumanDate from "components/HumanDate";
 
 export default {
   name: "RoomLog",
+  components: {
+    HumanDate
+  },
   data() {
     return {
       logs: store.logs,
