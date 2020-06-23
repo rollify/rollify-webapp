@@ -47,3 +47,7 @@ test: build-dev-image  ## Runs unit test.
 .PHONY: check
 check: build-dev-image  ## Runs checks.
 	@$(DOCKER_RUN_CMD) /bin/sh -c '$(CHECK_CMD)'
+
+.PHONY: ci-check
+ci-check: ## Runs checks in CI mode.
+	@$(CHECK_CMD)

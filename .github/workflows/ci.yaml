@@ -1,0 +1,44 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare dependencies
+        run: yarn
+      - name: Run check
+        run: make ci-check
+
+  release-image:
+    # Only on tags.
+    #if: startsWith(github.ref, 'refs/tags/')
+    # Only on master.
+    if: startsWith(github.ref, 'refs/heads/master')
+    env:
+      TAG_IMAGE_LATEST: "true"
+      PROD_IMAGE_NAME: ${GITHUB_REPOSITORY}
+    needs: [check]
+    name: Release image
+    runs-on: ubuntu-latest
+    # Only run in master and when has a tag.
+    steps:
+      - name: Set tag on VERSION env var
+        # Set up tag
+        #run: echo ::set-env name=VERSION::$(echo ${GITHUB_REF:10})
+        # Set up the sha.
+        run: echo ::set-env name=VERSION::${GITHUB_SHA}
+      - uses: actions/checkout@v1
+      - name: Build image
+        run: make build-image
+      - name: Docker login
+        run: docker login ${DOCKER_HOST} -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+        env:
+          DOCKER_HOST: ""
+          DOCKER_USER: slok
+          DOCKER_TOKEN: ${{secrets.DOCKER_HUB_TOKEN}}
+      - name: Publish image
+        run: make publish-image
