@@ -1,6 +1,6 @@
 <template>
   <div
-    class="row q-pa-md items-start q-gutter-md flex-center"
+    class="row q-pa-md items-start q-gutter-md flex-top"
     v-if="!this.diceRollResult.noResult"
   >
     <q-card class="col-2 my-card">
@@ -9,7 +9,7 @@
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        {{ diceRollResult.total }}
+        <h4>{{ diceRollResult.total }}</h4>
       </q-card-section>
     </q-card>
 

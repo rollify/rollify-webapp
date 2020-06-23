@@ -24,11 +24,11 @@
                 <h6>{{ props.row.user }}</h6>
               </q-td>
               <q-td key="diceRolls" :props="props">
-                <div class="row q-pa-xs q-gutter-xs justify-right">
+                <div class="row q-pa-md q-gutter-xs justify-right">
                   <div
                     v-for="die in props.row.dice"
                     :key="die.id"
-                    class="col-1"
+                    class="col-1 q-pa-md q-gutter-xs items-center"
                   >
                     <q-avatar
                       size="md"

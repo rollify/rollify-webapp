@@ -19,12 +19,18 @@
 
     <div class="row justify-center">
       <div class="q-pa-md q-gutter-sm">
-        <q-btn color="primary" label="Roll" @click="rollDiceBag" />
-        <q-btn color="red" label="Clear" @click="clearDiceBag" />
+        <q-btn flat color="primary" label="Clear" @click="clearDiceBag" />
+        <q-btn
+          color="primary"
+          label="Roll"
+          icon="fas fa-dice-d6"
+          @click="rollDiceBag"
+        />
       </div>
     </div>
-
-    <DiceRollResultCards :diceRollApiResult="diceRollApiResult" />
+    <div ref="results">
+      <DiceRollResultCards :diceRollApiResult="diceRollApiResult" />
+    </div>
   </q-page>
 </template>
 
@@ -82,11 +88,16 @@ export default {
       }
     },
 
+    scrollToResult() {
+      const el = this.$refs.results;
+      window.scrollTo(0, el.scrollHeight);
+    },
+
     // rollDiceBag will get all the dice quantity form the dice bag
     // and create a dice roll, after this it will grab the result and
     // set the result on data so it can be used by components that
     // transform this result in something visual.
-    rollDiceBag() {
+    async rollDiceBag() {
       let total = 0;
       const diceToRoll = [];
 
@@ -103,13 +114,15 @@ export default {
         return;
       }
 
-      this.makeCreateDiceRollRequest(diceToRoll)
-        .then(result => {
-          this.diceRollApiResult = result;
-        })
-        .catch(error => {
-          console.error(`Error creating dice roll: ${error}`);
-        });
+      try {
+        let result = await this.makeCreateDiceRollRequest(diceToRoll);
+        this.diceRollApiResult = result;
+
+        // Now scroll to the result.
+        this.scrollToResult();
+      } catch (e) {
+        console.error(`Error creating dice roll: ${e}`);
+      }
     }
   }
 };
