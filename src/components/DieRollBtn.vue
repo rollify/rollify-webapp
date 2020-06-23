@@ -7,7 +7,10 @@
           unelevated
           size="50px"
           dense
-          :icon="'img:' + die.metadata.buttonImage"
+          :icon="
+            'img:data:image/svg+xml;charset=utf8,' +
+              die.metadata.svgWithColor(die.metadata.color)
+          "
           v-model="die"
           @click="incDiceBag()"
         />
@@ -22,7 +25,8 @@
           type="number"
           outlined=""
           standout
-          style="max-width: 75px"
+          :rules="[val => val >= 0]"
+          style="max-width: 80px"
         />
       </div>
     </div>
