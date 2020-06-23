@@ -24,21 +24,7 @@
                 <h6>{{ props.row.user }}</h6>
               </q-td>
               <q-td key="diceRolls" :props="props">
-                <div class="row q-pa-md q-gutter-xs justify-right">
-                  <div
-                    v-for="die in props.row.dice"
-                    :key="die.id"
-                    class="col-1 q-pa-md q-gutter-xs items-center"
-                  >
-                    <q-avatar
-                      size="md"
-                      :color="die.metadata.color"
-                      text-color="white"
-                    >
-                      {{ die.value }}
-                    </q-avatar>
-                  </div>
-                </div>
+                <DiceResultChips :dice="props.row.dice" />
               </q-td>
             </q-tr>
           </template>
@@ -51,11 +37,13 @@
 <script>
 import { store } from "../store/store.js";
 import HumanDate from "components/HumanDate";
+import DiceResultChips from "components/DiceResultChips";
 
 export default {
   name: "RoomLog",
   components: {
-    HumanDate
+    HumanDate,
+    DiceResultChips
   },
   data() {
     return {
