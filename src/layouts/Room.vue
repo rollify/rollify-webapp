@@ -1,12 +1,28 @@
 <template>
   <div>
+    <q-dialog v-model="shareDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Share</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          To share this room with other people, use the room URL directly.
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <q-layout view="lHh Lpr lFf">
       <q-header elevated>
         <q-toolbar>
           <q-icon name="fas fa-dungeon" size="md" />
           <q-toolbar-title> {{ room.name }} </q-toolbar-title>
           {{ user.name }}
-          <q-btn flat round dense icon="share" />
+          <q-btn flat round dense icon="share" @click="shareDialog = true" />
         </q-toolbar>
 
         <q-tabs v-model="tab">
@@ -59,7 +75,8 @@ export default {
       user: store.user,
       users: store.users,
       room: store.room,
-      logs: store.logs
+      logs: store.logs,
+      shareDialog: false
     };
   },
 
