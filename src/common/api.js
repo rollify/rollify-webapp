@@ -22,6 +22,20 @@ export class RoomService {
       name: resp.data.name
     };
   }
+
+  // Gets room information:
+  // {
+  //   id   string
+  //   name string
+  // }
+  async getRoom(roomId) {
+    const resp = await this.axiosClient.get(`api/v1/rooms/${roomId}`);
+
+    return {
+      id: resp.data.id,
+      name: resp.data.name
+    };
+  }
 }
 
 // UserService knows how to contact with the server to make HTTP

@@ -65,9 +65,18 @@ export default {
 
   methods: {
     async getRoom() {
-      // We don't want to destroy the shared object.
-      store.room.id = this.$route.params.roomId;
-      store.room.name = this.$route.params.roomId;
+      try {
+        const room = await this.$apiRoomService.getRoom(store.room.id);
+        // We don't want to destroy the shared object.
+        store.room.id = room.id;
+        store.room.name = room.name;
+      } catch (e) {
+        console.log(`error getting room information: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "Error getting room information"
+        });
+      }
     },
 
     getDiceRollsInterval() {
