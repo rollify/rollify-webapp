@@ -3,7 +3,7 @@
     <q-layout view="lHh Lpr lFf">
       <q-header elevated>
         <q-toolbar>
-          <q-icon name="fas fa-dungeon" size="md" />
+          <q-icon name="fas fa-door-closed" size="md" />
           <q-toolbar-title> {{ room.name }} </q-toolbar-title>
           {{ user.name }}
           <q-btn flat round dense icon="share" @click="copyURLToClipboard" />
