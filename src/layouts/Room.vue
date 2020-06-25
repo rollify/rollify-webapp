@@ -1,28 +1,12 @@
 <template>
   <div>
-    <q-dialog v-model="shareDialog">
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">Share</div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          To share this room with other people, use the room URL directly.
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="OK" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
     <q-layout view="lHh Lpr lFf">
       <q-header elevated>
         <q-toolbar>
           <q-icon name="fas fa-dungeon" size="md" />
           <q-toolbar-title> {{ room.name }} </q-toolbar-title>
           {{ user.name }}
-          <q-btn flat round dense icon="share" @click="shareDialog = true" />
+          <q-btn flat round dense icon="share" @click="copyURLToClipboard" />
         </q-toolbar>
 
         <q-tabs v-model="tab">
@@ -58,6 +42,7 @@
 
 <script>
 import Vue from "vue";
+import { copyToClipboard } from "quasar";
 
 import { store } from "../store/store.js";
 import RoomIndex from "pages/RoomIndex";
@@ -75,8 +60,7 @@ export default {
       user: store.user,
       users: store.users,
       room: store.room,
-      logs: store.logs,
-      shareDialog: false
+      logs: store.logs
     };
   },
 
@@ -205,6 +189,22 @@ export default {
         }.bind(this),
         10000
       );
+    },
+
+    async copyURLToClipboard() {
+      try {
+        await copyToClipboard(window.location.href);
+        this.$q.notify({
+          type: "positive",
+          message: "URL copied to clipboard"
+        });
+      } catch (e) {
+        console.log(`error copying url to clipboard: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "could not copy URL to clipboard"
+        });
+      }
     }
   },
 
