@@ -25,7 +25,7 @@
           type="number"
           outlined=""
           standout
-          :rules="[val => val >= 0]"
+          :rules="[val => val >= 0 && val <= 100]"
           style="max-width: 80px"
         />
       </div>
