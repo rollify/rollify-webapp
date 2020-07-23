@@ -45,6 +45,7 @@ import Vue from "vue";
 import { copyToClipboard } from "quasar";
 
 import { store } from "../store/store.js";
+import { RoomEventService } from "../common/event";
 import RoomIndex from "pages/RoomIndex";
 import RoomLog from "pages/RoomLog";
 
@@ -80,36 +81,35 @@ export default {
       }
     },
 
-    getDiceRollsInterval() {
-      setInterval(
-        async function() {
-          try {
-            // Get dice rolls.
-            const diceRollsList = await this.$apiDiceRollService.listDiceRollsSince(
-              store.room.id,
-              store.logs.cursor
-            );
+    async getDiceRolls() {
+      try {
+        // Get dice rolls.
+        const diceRollsList = await this.$apiDiceRollService.listDiceRollsSince(
+          store.room.id,
+          store.logs.cursor
+        );
 
-            // Store next cursor if we have one.
-            if (diceRollsList.cursor) {
-              store.logs.cursor = diceRollsList.cursor;
-            }
+        // Store next cursor if we have one.
+        if (diceRollsList.cursor) {
+          store.logs.cursor = diceRollsList.cursor;
+        }
 
-            // Set dice rolls.
-            diceRollsList.diceRolls.forEach(diceRoll => {
-              store.logs.diceRolls.unshift(diceRoll);
-              store.logs.notifications++;
-            });
-          } catch (e) {
-            console.log(`error getting first dice rolls: ${e}`);
-            this.$q.notify({
-              type: "negative",
-              message: "Error getting dice rolls"
-            });
-          }
-        }.bind(this),
-        2500
-      );
+        // Set dice rolls.
+        diceRollsList.diceRolls.forEach(diceRoll => {
+          store.logs.diceRolls.unshift(diceRoll);
+          store.logs.notifications++;
+        });
+      } catch (e) {
+        console.log(`error getting first dice rolls: ${e}`);
+        this.$q.notify({
+          type: "negative",
+          message: "Error getting dice rolls"
+        });
+      }
+    },
+
+    getDiceRollsInterval(interval) {
+      setInterval(this.getDiceRolls.bind(this), interval);
     },
 
     async fillFirstDiceRolls() {
@@ -229,8 +229,16 @@ export default {
     await this.fillUsers();
     await this.fillFirstDiceRolls();
 
+    // Resync intervals.
     this.getUsersInterval();
-    this.getDiceRollsInterval();
+    this.getDiceRollsInterval(30000); // Fallback resync in case websocket missed.
+
+    // Subscriptions to events.
+    const evService = new RoomEventService(
+      this.$rollifyWsApiAddress,
+      store.room.id
+    );
+    evService.subscribeDiceRollCreated(this.getDiceRolls);
   }
 };
 </script>

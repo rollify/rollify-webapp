@@ -10,6 +10,10 @@ const axiosCli = axios.create({
   timeout: process.env.ROLLIFY_API_TIMEOUT
 });
 
+// Init important variables.
+Vue.prototype.$rollifyApiAddress = process.env.ROLLIFY_API_ADDRESS;
+Vue.prototype.$rollifyWsApiAddress = process.env.ROLLIFY_WEBSOCKET_API_ADDRESS;
+
 // Initialize our api services.
 Vue.prototype.$apiRoomService = new RoomService(axiosCli);
 Vue.prototype.$apiUserService = new UserService(axiosCli);
