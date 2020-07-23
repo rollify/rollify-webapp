@@ -231,7 +231,7 @@ export default {
 
     // Resync intervals.
     this.getUsersInterval();
-    this.getDiceRollsInterval(30000); // Fallback resync in case websocket missed.
+    this.getDiceRollsInterval(15000); // Fallback resync in case websocket missed.
 
     // Subscriptions to events.
     const evService = new RoomEventService(

@@ -11,8 +11,8 @@ export class RoomEventService {
     this.connectWebSocket();
   }
 
-  // private method thja connects to the websocket and reconnects if the connection fails
-  // it will call to the callbacks subscribed to the different room events
+  // private method that connects to the websocket and reconnects if the connection fails.
+  // it will call to the callbacks subscribed to the different room events.
   connectWebSocket() {
     var ws = new WebSocket(`${this.host}/api/v1/ws/rooms/${this.room}`);
     ws.onopen = () => {
