@@ -48,6 +48,9 @@ module.exports = function(/*ctx*/) {
       // Add Variables on env vars at build time.
       env: {
         ROLLIFY_API_ADDRESS: JSON.stringify(config.ROLLIFY_API_ADDRESS),
+        ROLLIFY_WEBSOCKET_API_ADDRESS: JSON.stringify(
+          config.ROLLIFY_WEBSOCKET_API_ADDRESS
+        ),
         ROLLIFY_API_TIMEOUT: JSON.stringify(config.ROLLIFY_API_TIMEOUT)
       },
 

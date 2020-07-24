@@ -1,5 +1,6 @@
 // This variables will be loaded into the env, check `quasar.conf.js`.
 module.exports = {
   ROLLIFY_API_ADDRESS: "https://api.rollify.app",
+  ROLLIFY_WEBSOCKET_API_ADDRESS: "wss://api.rollify.app",
   ROLLIFY_API_TIMEOUT: 2000
 };
