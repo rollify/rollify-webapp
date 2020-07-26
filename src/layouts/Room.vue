@@ -43,6 +43,7 @@
 <script>
 import Vue from "vue";
 import { copyToClipboard } from "quasar";
+import { Mutex } from "async-mutex";
 
 import { store } from "../store/store.js";
 import { RoomEventService } from "../common/event";
@@ -61,7 +62,8 @@ export default {
       user: store.user,
       users: store.users,
       room: store.room,
-      logs: store.logs
+      logs: store.logs,
+      mutex: new Mutex()
     };
   },
 
@@ -82,6 +84,12 @@ export default {
     },
 
     async getDiceRolls() {
+      // Use a mutex to log the gather of dice rolls, mainly this is needed because we can get dice
+      // rolls in from different ways: regular internvals and websocket events. In case the regular
+      // interval resync happens at the same time we received a websocket event so we get dice rolls
+      // we will end with duplicated rolls because the same cursor value has been taken by both
+      // gatherings. If we use a mutex, these two gathers will be sequantial.
+      const releaseMutex = await this.mutex.acquire();
       try {
         // Get dice rolls.
         const diceRollsList = await this.$apiDiceRollService.listDiceRollsSince(
@@ -105,6 +113,8 @@ export default {
           type: "negative",
           message: "Error getting dice rolls"
         });
+      } finally {
+        releaseMutex();
       }
     },
 
@@ -161,7 +171,7 @@ export default {
       }
     },
 
-    async getUsersInterval() {
+    async getUsersInterval(interval) {
       setInterval(
         async function() {
           try {
@@ -187,7 +197,7 @@ export default {
             });
           }
         }.bind(this),
-        10000
+        interval
       );
     },
 
@@ -230,7 +240,7 @@ export default {
     await this.fillFirstDiceRolls();
 
     // Resync intervals.
-    this.getUsersInterval();
+    this.getUsersInterval(10000);
     this.getDiceRollsInterval(15000); // Fallback resync in case websocket missed.
 
     // Subscriptions to events.
